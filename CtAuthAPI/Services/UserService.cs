@@ -11,11 +11,13 @@ public interface IUserService
 
 public class UserService : IUserService
 {
+    private readonly ILogger<UserService> _logger;
     private readonly UserContext _context;
 
-    public UserService(UserContext context)
+    public UserService(UserContext context, ILogger<UserService> logger)
     {
         _context = context;
+        _logger = logger;
     }
     
     public Task<List<User>> GetUsersAsync()
@@ -28,7 +30,7 @@ public class UserService : IUserService
         throw new NotImplementedException();
     }
     
-    public Task<User> CreateUserAsync(string name, string email, string password)
+    public async Task<User> CreateUserAsync(string name, string email, string password)
     {
         throw new NotImplementedException();
     }

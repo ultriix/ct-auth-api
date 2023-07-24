@@ -4,16 +4,16 @@ using CtAuthAPI.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-builder.Services.AddScoped<IUserService>();
-builder.Services.AddScoped<IAuthService>();
-
-// add controllers
-builder.Services.AddControllers();
-
 // set up in-memory database for testing
 builder.Services.AddDbContext<UserContext>(opt =>
     opt.UseInMemoryDatabase("UserDB"));
+
+// Add services
+builder.Services.AddSingleton<IAuthService, AuthService>();
+builder.Services.AddScoped<IUserService, UserService>();
+
+// add controllers
+builder.Services.AddControllers();
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
@@ -29,9 +29,6 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-
 app.UseAuthorization();
-
 app.MapControllers();
-
 app.Run();

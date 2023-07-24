@@ -1,22 +1,21 @@
-﻿using CtAuthAPI.Models;
-
+﻿
 namespace CtAuthAPI.Services;
 
 public interface IAuthService
 {
-    string GenerateToken(string email);
+    string GenerateJwtToken(string email);
 }
 
 public class AuthService : IAuthService
 {
-    private readonly UserContext _context;
-
-    public AuthService(UserContext context)
+    private readonly ILogger<AuthService> _logger;
+    
+    public AuthService(ILogger<AuthService> logger)
     {
-        _context = context;
+        _logger = logger;
     }
 
-    public string GenerateToken(string email)
+    public string GenerateJwtToken(string email)
     {
         throw new NotImplementedException();
     }

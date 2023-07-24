@@ -73,6 +73,14 @@ Things you may want to consider:
 
 6) Implement controller logic to satisfy brief, configure swagger as needed to allow manual testing.
 
+
 ## Implementation Notes
 
-TBC
+1) CLI template basic swagger setup so I didn't need to add it, this is easier for manual testing as opposed to Curl or Postman. If I were aiming for production I would also setup for full Https with an SSL certificate. Im using http only for the purposes of the code test.
+
+2) Brief skeleton added for solution and unit tests.
+
+3) Added basic unit tests to ensure service logic keeps to intended scope.
+    - Added required key on user model for in memory db. Given that I would normally return a dto from the controller rather than the internal model, I would encode this id if it was required outside of the system.
+
+    - Given more time I would also test the hashing is done correctly on the user password and verify more details of the jwt token than just the email.
