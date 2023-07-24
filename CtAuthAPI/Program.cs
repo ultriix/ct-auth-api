@@ -1,0 +1,37 @@
+using Microsoft.EntityFrameworkCore;
+using CtAuthAPI.Models;
+using CtAuthAPI.Services;
+
+var builder = WebApplication.CreateBuilder(args);
+
+// Add services to the container.
+builder.Services.AddScoped<IUserService>();
+builder.Services.AddScoped<IAuthService>();
+
+// add controllers
+builder.Services.AddControllers();
+
+// set up in-memory database for testing
+builder.Services.AddDbContext<UserContext>(opt =>
+    opt.UseInMemoryDatabase("UserDB"));
+
+// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+
+var app = builder.Build();
+
+// Configure the HTTP request pipeline.
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
+
+app.UseHttpsRedirection();
+
+app.UseAuthorization();
+
+app.MapControllers();
+
+app.Run();
