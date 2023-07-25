@@ -1,5 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
+using CtAuthAPI.Models;
 using CtAuthAPI.Services;
+
 
 namespace CtAuthAPI.Controllers;
 
@@ -18,8 +21,8 @@ public class UserController : ControllerBase
         _authService = authService;
     }
 
+    [Authorize]
     [HttpGet("ListUsers")]
-    // TODO: lock by bearer auth
     public async Task<IActionResult> GetAll()
     {
         return StatusCode(418);
@@ -32,8 +35,15 @@ public class UserController : ControllerBase
     }
 
     [HttpPost("GetJwtToken")]
-    public async Task<IActionResult> Authenticate(string email, string password)
+    public async Task<IActionResult> GetJwtToken(string email, string password)
     {
-        return StatusCode(418);
+        // TODO: Get user first to ensure they exist
+
+        // If credentials are valid, generate a JWT
+        string token = _authService.GenerateJwtToken(email);
+
+        // Return the token
+        return Ok(token);
     }
+    
 }

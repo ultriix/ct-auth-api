@@ -1,24 +1,29 @@
 using System.IdentityModel.Tokens.Jwt;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Configuration;
 using NUnit.Framework;
 using Moq;
 using CtAuthAPI.Services;
+
 
 namespace CtAuthAPI.Tests;
 
 [TestFixture]
 public class AuthServiceTests
 {
+    private Mock<IConfiguration> _mockConfiguration;
     private Mock<ILogger<AuthService>> _mockLogger;
     private IAuthService _authService;
 
     [SetUp]
     public void Setup()
     {
+        _mockConfiguration = new Mock<IConfiguration>();
+        _mockConfiguration.Setup(c => c.GetSection("AuthSettings:SecretKey").Value).Returns("xQmvTujdRLHawL9HAcFzEaRBE8exz4x7");
         _mockLogger = new Mock<ILogger<AuthService>>();
         
         // assign sut
-        _authService = new AuthService(_mockLogger.Object);
+        _authService = new AuthService(_mockConfiguration.Object, _mockLogger.Object);
     }
 
     [Test]

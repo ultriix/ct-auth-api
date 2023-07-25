@@ -84,3 +84,8 @@ Things you may want to consider:
     - Added required key on user model for in memory db. Given that I would normally return a dto from the controller rather than the internal model, I would encode this id if it was required outside of the system.
 
     - Given more time I would also test the hashing is done correctly on the user password and verify more details of the jwt token than just the email.
+
+4) Added jwt configuration on startup for token generation and swagger auth, added token generation methods in authservice / controller. Auth unit test passed.
+    - The secret (min 32 chars) we use to generate the key is injected from app settings currently, this would normally be injected through the environment / deployment from a service like AWS Systems Manager Parameter Store or Azure Key Vault.
+
+    - The token content is simplistic and some properties have been excluded such as Issuer and Audience which would normally be injected in the same way as the secret.
