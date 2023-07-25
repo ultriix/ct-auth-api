@@ -107,3 +107,14 @@ Things you may want to consider:
    - Manually tested controller endpoints with swagger, all working as expected apart from needed extra auth props as described below. 
    - Added missing props to disable validate issuer and audience as well as matching secret in startup auth config, caught this requirement in manual testing.
    - Added docs on controller endpoints, Swagger not picking endpoint docs up so possibly needs additional config for that.
+
+
+## Considerations
+
+Given more time I would have increased the number of unit test cases to verify more of the token generation and password hashing. I would have also tested more layers such as testing the controller.
+
+Beyond the code test, I would implement a proper `startup.cs` for configuring the WebAPI's dependencies and services. This is also the opportunity to setup rate limiting and proper authentication for Swagger to make the WebAPI more suitable for a live environment.
+
+An in-memory db is not performant or scalable in a live environment so this would be replaced by a separate database service. This would be relatively easy to swap out after enhancing the startup above.
+
+Any secrets or environment parameters can be injected to the WebAPI to avoid hardcoding these details in VCS.
