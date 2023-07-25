@@ -8,6 +8,7 @@ using Moq;
 using CtAuthAPI.Models;
 using CtAuthAPI.Services;
 
+
 namespace CtAuthAPI.Tests;
 
 [TestFixture]
@@ -59,22 +60,23 @@ public class UserServiceTests
     }
     
     [Test]
-    public async Task GetUser_ReturnsUser()
+    public async Task GetUser_ValidCredentials_ReturnsUser()
     {
         // setup
         var user = new User { Name = "TEST USER 2", Email = "user2@example.com", Password = "USER2_PASSWORD"};
-        await _context.Users.AddAsync(user);
-        await _context.SaveChangesAsync();
+        // create using method to include hashing
+        await _userService.CreateUserAsync(user.Name, user.Email, user.Password);
 
         // act
-        User result = await _userService.GetUserAsync(user.Email, user.Password);
+        User? result = await _userService.GetUserAsync(user.Email, user.Password);
     
         // assert
         Assert.IsNotNull(result);
         Assert.IsInstanceOf<User>(result);
     
-        Assert.That(result.Email, Is.EqualTo(user.Email));
-        Assert.That(result.Password, Is.Not.EqualTo(user.Password)); // assert we are not returning the original password
+        Assert.That(result?.Email, Is.EqualTo(user.Email));
+        if(result != null)
+            Assert.That(result.Password, Is.Not.EqualTo(user.Password)); // assert we are not returning the original password
     }
     
     [Test]

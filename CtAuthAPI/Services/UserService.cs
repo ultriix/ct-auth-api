@@ -1,11 +1,39 @@
-﻿using CtAuthAPI.Models;
+﻿using Microsoft.EntityFrameworkCore;
+using CtAuthAPI.Models;
+using CtAuthAPI.Utils;
 
 namespace CtAuthAPI.Services;
 
 public interface IUserService
 {
+    /// <summary>
+    /// For development, will seed the database with test users.
+    /// </summary>
+    Task SeedUsersAsync();
+    
+    /// <summary>
+    /// Returns all users in the database.
+    /// </summary>
+    /// <returns></returns>
     Task<List<User>> GetUsersAsync();
-    Task<User> GetUserAsync(string email, string password);
+    
+    /// <summary>
+    /// Gets an existing user matching an email and plain password.
+    ///
+    /// The password will be verified against the matching users hashed password.
+    /// </summary>
+    /// <param name="email"></param>
+    /// <param name="password"></param>
+    /// <returns></returns>
+    Task<User?> GetUserAsync(string email, string password);
+    
+    /// <summary>
+    /// Creates a user in the database.
+    /// </summary>
+    /// <param name="name"></param>
+    /// <param name="email"></param>
+    /// <param name="password"></param>
+    /// <returns></returns>
     Task<User> CreateUserAsync(string name, string email, string password);
 }
 
@@ -20,19 +48,47 @@ public class UserService : IUserService
         _logger = logger;
     }
     
-    public Task<List<User>> GetUsersAsync()
+    
+    public async Task SeedUsersAsync()
     {
-        throw new NotImplementedException();
+        if (_context.Users.Any()) return;
+        
+        await CreateUserAsync("TEST USER 1", "user1@example.com", "USER1_PASSWORD");
+        await CreateUserAsync("TEST USER 2", "user2@example.com", "USER2_PASSWORD");
+        await CreateUserAsync("TEST USER 3", "user3@example.com", "USER3_PASSWORD");
     }
     
-    public Task<User> GetUserAsync(string email, string password)
+    public async Task<List<User>> GetUsersAsync()
     {
-        throw new NotImplementedException();
+        return await _context.Users.ToListAsync();
+    }
+    
+    public async Task<User?> GetUserAsync(string email, string password)
+    {
+        User? user = await _context.Users
+            .FirstOrDefaultAsync(u => u.Email == email);
+        
+        // return null if either no user exists or password is incorrect
+        if(user == null || !PasswordUtils.VerifyPassword(user.Password, password))
+            return null;
+        
+        return user;
     }
     
     public async Task<User> CreateUserAsync(string name, string email, string password)
     {
-        throw new NotImplementedException();
+        var user = new User
+        {
+            Name = name,
+            Email = email,
+            Password = PasswordUtils.HashPassword(password)
+        };
+        
+        // store in db
+        await _context.Users.AddAsync(user);
+        await _context.SaveChangesAsync();
+        
+        return user;
     }
-    
+
 }

@@ -8,6 +8,11 @@ namespace CtAuthAPI.Services;
 
 public interface IAuthService
 {
+    /// <summary>
+    /// Given an email, generates a Jwt token for use as Bearer authentication.
+    /// </summary>
+    /// <param name="email"></param>
+    /// <returns></returns>
     string GenerateJwtToken(string email);
 }
 
@@ -21,7 +26,7 @@ public class AuthService : IAuthService
         _secretKey = config.GetSection("AuthSettings:SecretKey").Value;
         _logger = logger;
     }
-
+    
     public string GenerateJwtToken(string email)
     {
         var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_secretKey));
@@ -41,4 +46,5 @@ public class AuthService : IAuthService
 
         return new JwtSecurityTokenHandler().WriteToken(token);
     }
+    
 }

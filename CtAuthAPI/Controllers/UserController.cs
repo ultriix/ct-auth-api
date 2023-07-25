@@ -10,37 +10,63 @@ namespace CtAuthAPI.Controllers;
 [Route("[controller]")]
 public class UserController : ControllerBase
 {
-    private readonly ILogger<UserController> _logger;
     private readonly IUserService _userService;
     private readonly IAuthService _authService;
 
-    public UserController(ILogger<UserController> logger, IUserService userService, IAuthService authService)
+    public UserController(IUserService userService, IAuthService authService)
     {
-        _logger = logger;
         _userService = userService;
         _authService = authService;
     }
-
+    
+    /// <summary>
+    /// Requires valid auth token, returns all users in the database.
+    /// </summary>
+    /// <returns>All users in the database.</returns>
     [Authorize]
     [HttpGet("ListUsers")]
-    public async Task<IActionResult> GetAll()
+    public async Task<IActionResult> ListUsers()
     {
-        return StatusCode(418);
+        List<User> users = await _userService.GetUsersAsync();
+        
+        return Ok(users);
     }
 
+    /// <summary>
+    /// Creates a user in the database.
+    /// </summary>
+    /// <param name="name"></param>
+    /// <param name="email"></param>
+    /// <param name="password"></param>
+    /// <returns></returns>
     [HttpPost("CreateUser")]
-    public async Task<IActionResult> Register(string name, string email, string password)
+    public async Task<IActionResult> CreateUser(string name, string email, string password)
     {
-        return StatusCode(418);
+        User user = await _userService.CreateUserAsync(name, email, password);
+        
+        return CreatedAtAction("CreateUser", user);
     }
 
+    /// <summary>
+    /// Returns a valid Jwt Token for an existing user.
+    ///
+    /// Valid credentials are required.
+    /// </summary>
+    /// <param name="email"></param>
+    /// <param name="password"></param>
+    /// <returns></returns>
     [HttpPost("GetJwtToken")]
     public async Task<IActionResult> GetJwtToken(string email, string password)
     {
-        // TODO: Get user first to ensure they exist
+        // Verify the user exists
+        User? user = await _userService.GetUserAsync(email, password);
+
+        // If no user was matched, return blanket 401
+        if (user == null)
+            return Unauthorized();
 
         // If credentials are valid, generate a JWT
-        string token = _authService.GenerateJwtToken(email);
+        string token = _authService.GenerateJwtToken(user.Email);
 
         // Return the token
         return Ok(token);

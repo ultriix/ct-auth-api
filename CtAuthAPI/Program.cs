@@ -1,3 +1,4 @@
+using System.Text;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
@@ -13,13 +14,17 @@ builder.Services.AddDbContext<UserContext>(opt =>
     opt.UseInMemoryDatabase("UserDB"));
 
 // Add authentication for Jwt Token
+string? secretKey = builder.Configuration.GetSection("AuthSettings:SecretKey").Value;
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
         options.TokenValidationParameters = new TokenValidationParameters
         {
             ValidateLifetime = true,
-            ValidateIssuerSigningKey = true
+            ValidateIssuerSigningKey = true,
+            ValidateIssuer = false, // Disabled dev only: Don't validate the issuer
+            ValidateAudience = false, // Disabled dev only: Don't validate the audience
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey))
         };
     });
 
@@ -65,14 +70,24 @@ builder.Services.AddControllers();
 
 WebApplication app = builder.Build();
 
-// Configure the HTTP request pipeline.
+// Set up for development environment
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI(c => { c.SwaggerEndpoint("/swagger/v1/swagger.json", "CtAuthAPI v1"); });
+    
+    // Seed the database
+    using (IServiceScope scope = app.Services.CreateScope())
+    {
+        IServiceProvider services = scope.ServiceProvider;
+        
+        // For development only, the wait will cause thread locking
+        var userService = services.GetRequiredService<IUserService>();
+        userService.SeedUsersAsync().Wait();
+    }
 }
 
-app.UseHttpsRedirection();
+// app.UseHttpsRedirection(); // Disabled dev only: Not using Https
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();

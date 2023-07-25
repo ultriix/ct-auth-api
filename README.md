@@ -2,9 +2,17 @@
 
 ## Quick Start
 
-TBC
+1) Clone this repository.
+2) Open / Run the solution in Visual Studio or Rider.
+3) Swagger should open in browser, else navigate to `http://localhost:7126/swagger/index.html`.
 
-<br>
+#### Inside Swagger UI
+1) Verify ListUsers endpoint returns unauthorized.
+2) Use the CreateUser endpoint to create your user.
+3) Use the GetJwtToken endpoint to generate a token for the user you created, copy this token.
+4) At the top right of the Swagger UI, click Authorize button and paste the generated token.
+5) Verify ListUsers endpoint now returns all users in database including the one you created.
+
 <br>
 
 ## Objective
@@ -82,10 +90,20 @@ Things you may want to consider:
 
 3) Added basic unit tests to ensure service logic keeps to intended scope.
     - Added required key on user model for in memory db. Given that I would normally return a dto from the controller rather than the internal model, I would encode this id if it was required outside of the system.
-
     - Given more time I would also test the hashing is done correctly on the user password and verify more details of the jwt token than just the email.
 
 4) Added jwt configuration on startup for token generation and swagger auth, added token generation methods in authservice / controller. Auth unit test passed.
     - The secret (min 32 chars) we use to generate the key is injected from app settings currently, this would normally be injected through the environment / deployment from a service like AWS Systems Manager Parameter Store or Azure Key Vault.
-
     - The token content is simplistic and some properties have been excluded such as Issuer and Audience which would normally be injected in the same way as the secret.
+    - Added extra props to disable validate issuer and audience as well as matching secret in startup auth config, normally we would use genuine values for these. 
+
+5) Implemented user service methods including seeding for testing, added private methods to hash password and validate an existing hash. User service tests passed.
+    - Needed to update the setup of getUser unit test to include the hashing of users password.
+    - Pulled out hashing logic into static utils class to promote further re-use.
+    - Seeding might be better done elsewhere as used only for development, could use hashing utils to insert as needed.
+    - Documented interfaces of services for consumers.
+
+6) Implemented controller endpoints for user. Given more time I would have created unit tests for the controller layer, ideally following TDD.
+   - Manually tested controller endpoints with swagger, all working as expected apart from needed extra auth props as described below. 
+   - Added missing props to disable validate issuer and audience as well as matching secret in startup auth config, caught this requirement in manual testing.
+   - Added docs on controller endpoints, Swagger not picking endpoint docs up so possibly needs additional config for that.
